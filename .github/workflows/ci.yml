@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  portable-tests:
+    name: Parser and formatter tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo test --all-targets
+
+  windows-wmi:
+    name: Windows WMI and legacy conformance
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --all-targets
+      - run: cargo build --release
+      - name: Compare safe commands with legacy WMIC
+        shell: pwsh
+        run: ./tools/differential.ps1 -Candidate ./target/release/wmic.exe -RequireOracle

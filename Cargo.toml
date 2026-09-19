@@ -1,0 +1,22 @@
+[package]
+name = "wmic-rs"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "A test-first, native Rust reimplementation of Microsoft's deprecated WMIC CLI"
+license = "MIT"
+repository = "https://github.com/wtf9880/wmic"
+
+[[bin]]
+name = "wmic"
+path = "src/main.rs"
+
+[dependencies]
+
+[target.'cfg(windows)'.dependencies]
+wmi = { version = "=0.18.4", default-features = false }
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true

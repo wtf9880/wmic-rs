@@ -1,0 +1,22 @@
+name: Capture legacy WMIC oracle
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Capture help, alias metadata, and WBEM file inventory
+        shell: pwsh
+        run: ./tools/capture-oracle.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wmic-oracle-windows-2022
+          path: wmic-oracle
+          if-no-files-found: error
+          retention-days: 90

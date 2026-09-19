@@ -1,0 +1,22 @@
+[
+  {
+    "name": "operating-system-value",
+    "args": ["os", "get", "OSLanguage", "/value"]
+  },
+  {
+    "name": "path-value",
+    "args": ["path", "Win32_OperatingSystem", "get", "OSLanguage", "/value"]
+  },
+  {
+    "name": "computer-product-uuid",
+    "args": ["csproduct", "get", "UUID", "/value"]
+  },
+  {
+    "name": "logical-disk-filter-and-csv",
+    "args": ["logicaldisk", "where", "DeviceID='C:'", "get", "DeviceID,DriveType", "/format:csv"]
+  },
+  {
+    "name": "boolean-value",
+    "args": ["os", "get", "Debug", "/value"]
+  }
+]
