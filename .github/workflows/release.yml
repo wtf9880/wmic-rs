@@ -24,11 +24,19 @@ jobs:
         run: |
           if ($env:GITHUB_REF -like "refs/tags/v*") {
             $tag = $env:GITHUB_REF.Substring("refs/tags/".Length)
+            $prerelease = "false"
           } else {
-            $version = (Select-String -Path Cargo.toml -Pattern '^version = "(.+)"').Matches[0].Groups[1].Value
-            $tag = "v$version"
+            $tag = "nightly"
+            $prerelease = "true"
           }
           Add-Content -Path $env:GITHUB_OUTPUT -Value "tag=$tag"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "prerelease=$prerelease"
+      #- name: Move nightly tag
+      #  if: steps.version.outputs.tag == 'nightly'
+      #  shell: pwsh
+      #  run: |
+      #    git tag -f nightly
+      #    git push -f origin nightly
       - name: Name Windows binary
         id: binary
         shell: pwsh
@@ -41,6 +49,7 @@ jobs:
       - uses: softprops/action-gh-release@v3.0.4
         with:
           tag_name: ${{ steps.version.outputs.tag }}
+          prerelease: ${{ steps.version.outputs.prerelease }}
           files: ${{ steps.binary.outputs.binary }}
           fail_on_unmatched_files: true
           generate_release_notes: true
