@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and release Windows binary
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo build --release
+      - name: Resolve release tag
+        id: version
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF -like "refs/tags/v*") {
+            $tag = $env:GITHUB_REF.Substring("refs/tags/".Length)
+          } else {
+            $version = (Select-String -Path Cargo.toml -Pattern '^version = "(.+)"').Matches[0].Groups[1].Value
+            $tag = "v$version"
+          }
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "tag=$tag"
+      - name: Package Windows binary
+        id: package
+        shell: pwsh
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          $archive = "wmic-rs-$env:TAG-windows-x86_64.zip"
+          Compress-Archive -Path target/release/wmic.exe, README.md, LICENSE -DestinationPath $archive
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "archive=$archive"
+      - uses: softprops/action-gh-release@v3.0.4
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          files: ${{ steps.package.outputs.archive }}
+          fail_on_unmatched_files: true
+          generate_release_notes: true
