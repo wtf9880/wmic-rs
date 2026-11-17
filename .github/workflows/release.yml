@@ -52,4 +52,5 @@ jobs:
           prerelease: ${{ steps.version.outputs.prerelease }}
           files: ${{ steps.binary.outputs.binary }}
           fail_on_unmatched_files: true
-          generate_release_notes: true
+          generate_release_notes: ${{ steps.version.outputs.tag != 'nightly' }}
+          body: ${{ steps.version.outputs.tag == 'nightly' && format('Nightly build of {0}.', github.sha) || '' }}
