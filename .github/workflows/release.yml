@@ -28,18 +28,18 @@ jobs:
             $tag = "v$version"
           }
           Add-Content -Path $env:GITHUB_OUTPUT -Value "tag=$tag"
-      - name: Package Windows binary
-        id: package
+      - name: Name Windows binary
+        id: binary
         shell: pwsh
         env:
           TAG: ${{ steps.version.outputs.tag }}
         run: |
-          $archive = "wmic-rs-$env:TAG-windows-x86_64.zip"
-          Compress-Archive -Path target/release/wmic.exe, README.md, LICENSE -DestinationPath $archive
-          Add-Content -Path $env:GITHUB_OUTPUT -Value "archive=$archive"
+          $binary = "wmic-rs-$env:TAG-windows-x86_64.exe"
+          Copy-Item -Path target/release/wmic.exe -Destination $binary
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "binary=$binary"
       - uses: softprops/action-gh-release@v3.0.4
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          files: ${{ steps.package.outputs.archive }}
+          files: ${{ steps.binary.outputs.binary }}
           fail_on_unmatched_files: true
           generate_release_notes: true
